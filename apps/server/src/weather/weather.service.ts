@@ -2,14 +2,8 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { Units } from '../common/enums/units.enums';
-
-interface WeatherParams {
-    appid: string;
-    lat: number;
-    lon: number;
-    exclude?: string;
-    units?: Units.Imperial | Units.Metric;
-}
+import { WeatherData } from './interfaces/weather.interface';
+import { WeatherAPIParamsDto } from './dto/weather.dto';
 
 @Injectable()
 export class WeatherService {
@@ -27,82 +21,37 @@ export class WeatherService {
         city: string,
         frequency: string = 'current',
         units: Units = Units.Imperial
-    ): Promise<any> {
-        console.log('frequency', frequency);
+    ): Promise<WeatherData> {
         const { lat, lon } = await this.getCityCoordinates(city);
-        const exclude = ['current', 'minutely', 'hourly', 'daily', 'alerts']
+        return this.getWeatherByLatLon(lat, lon, frequency, units);
+    }
+
+    async getWeatherByLatLon(
+        lat: number,
+        lon: number,
+        frequency: string = 'current',
+        units: Units = Units.Imperial
+    ): Promise<WeatherData> {
+        const exclude: string = [
+            'current',
+            'minutely',
+            'hourly',
+            'daily',
+            'alerts',
+        ]
             .filter((_frequency: string) => _frequency !== frequency)
             .join(',');
-        console.log('exclude', exclude);
-        const params: WeatherParams = {
+        const params = new WeatherAPIParamsDto({
             appid: this.apiKey,
             lat,
             lon,
             exclude,
             units,
-        };
+        });
         const response = await axios.get(this.apiUrl, { params });
-
         console.log('response.data', response.data);
 
         return response.data;
-    }
-
-    async getCurrentWeatherByCity(city: string): Promise<any> {
-        try {
-            const { lat, lon } = await this.getCityCoordinates(city);
-            console.log('here');
-            const params = {
-                lat,
-                lon,
-                exclude: 'current,minutely,hourly,daily,alerts',
-                appid: this.apiKey,
-                units: 'metric',
-            };
-            const response = await axios.get(this.apiUrl, { params });
-
-            console.log('response.data.current', response.data.current);
-
-            return response.data.current;
-        } catch (error) {
-            this.handleError(error);
-        }
-    }
-
-    async getHourlyWeatherByCity(city: string): Promise<any> {
-        try {
-            const { lat, lon } = await this.getCityCoordinates(city);
-            const params = {
-                lat,
-                lon,
-                exclude: 'current,minutely,daily,alerts',
-                appid: this.apiKey,
-                units: 'metric',
-            };
-            const response = await axios.get(this.apiUrl, { params });
-
-            return response.data.hourly;
-        } catch (error) {
-            this.handleError(error);
-        }
-    }
-
-    async getDailyWeatherByCity(city: string): Promise<any> {
-        try {
-            const { lat, lon } = await this.getCityCoordinates(city);
-            const params = {
-                lat,
-                lon,
-                exclude: 'current,minutely,hourly,alerts',
-                appid: this.apiKey,
-                units: 'metric',
-            };
-            const response = await axios.get(this.apiUrl, { params });
-
-            return response.data.daily;
-        } catch (error) {
-            this.handleError(error);
-        }
     }
 
     private async getCityCoordinates(
@@ -115,9 +64,12 @@ export class WeatherService {
         };
 
         try {
-            const response: { data: { coord: { lat: number; lon: number } } } =
-                await axios.get(this.geoApiUrl, { params });
-            const { lat, lon } = response.data?.coord;
+            const response: {
+                data: {
+                    coord: { lat: number; lon: number };
+                };
+            } = await axios.get(this.geoApiUrl, { params });
+            const { lat, lon } = response.data.coord;
 
             return { lat, lon };
         } catch (error) {
