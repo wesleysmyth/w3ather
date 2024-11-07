@@ -1,9 +1,10 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { Units } from '../common/enums/units.enums';
 import { WeatherData } from './interfaces/weather.interface';
 import { WeatherAPIParamsDto } from './dto/weather.dto';
+import { CityAPIParamsDto } from './dto/city.dto';
 
 @Injectable()
 export class WeatherService {
@@ -19,17 +20,17 @@ export class WeatherService {
 
     async getWeatherByCity(
         city: string,
-        frequency: string = 'current',
+        frequency = 'current',
         units: Units = Units.Imperial
     ): Promise<WeatherData> {
         const { lat, lon } = await this.getCityCoordinates(city);
-        return this.getWeatherByLatLon(lat, lon, frequency, units);
+        return this.getWeatherByCoords(lat, lon, frequency, units);
     }
 
-    async getWeatherByLatLon(
+    async getWeatherByCoords(
         lat: number,
         lon: number,
-        frequency: string = 'current',
+        frequency = 'current',
         units: Units = Units.Imperial
     ): Promise<WeatherData> {
         const exclude: string = [
@@ -57,11 +58,11 @@ export class WeatherService {
     private async getCityCoordinates(
         city: string
     ): Promise<{ lat: number; lon: number }> {
-        const params = {
+        const params = new CityAPIParamsDto({
             q: city,
             limit: 1,
             appid: this.apiKey,
-        };
+        });
 
         try {
             const response: {
@@ -77,12 +78,12 @@ export class WeatherService {
         }
     }
 
-    private handleError(error: any) {
+    private handleError(error: AxiosError<{ message: string }>): void {
         console.log('error', error);
         if (error.response) {
             throw new HttpException(
                 error.response?.data?.message || 'Error fetching weather data',
-                error.response.status
+                error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
             );
         } else {
             throw new HttpException(
