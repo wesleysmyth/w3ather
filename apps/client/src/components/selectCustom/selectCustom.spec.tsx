@@ -1,9 +1,9 @@
 import { render } from '@testing-library/react';
-import Loader from './loader';
+import SelectCustom from '.';
 
-describe('Loader', () => {
+describe('SelectCustom', () => {
     it('should render successfully', () => {
-        const { baseElement } = render(<Loader />);
+        const { baseElement } = render(<SelectCustom />);
         expect(baseElement).toBeTruthy();
     });
 });
