@@ -1,3 +1,5 @@
+// @import '../../styles.scss';
+
 // colors
 $cloudColor: #4c9beb;
 $sunColor: #fcbb04;
@@ -23,6 +25,8 @@ $leftBorderRadius: 50% 50% 0% 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
 }
 
 .weather {
@@ -128,5 +132,23 @@ $leftBorderRadius: 50% 50% 0% 50%;
 
     100% {
         transform: translateX(15px);
+    }
+}
+
+@-webkit-keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }

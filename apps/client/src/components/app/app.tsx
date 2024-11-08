@@ -1,4 +1,4 @@
-import './app.module.scss';
+import styles from './app.module.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import Loader from '../loader';
 import SelectCustom from '../selectCustom';
@@ -6,7 +6,7 @@ import { Mode } from '../../enums/modes';
 import { LocationState, ModeState } from '../../types';
 
 const App: React.FC = () => {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [location, setLocation] = useState<LocationState>({});
     const [mode, setMode] = useState<ModeState>(null);
     const onSuccess = useCallback(
@@ -38,6 +38,13 @@ const App: React.FC = () => {
         });
     }, []);
 
+    // initial load effect
+    useEffect(() => {
+        setTimeout(() => {
+            setLoading(false);
+        }, 3000);
+    }, []);
+
     useEffect(() => {
         if (mode === Mode.Location) {
             if (!('geolocation' in navigator)) {
@@ -67,6 +74,7 @@ const App: React.FC = () => {
             ) : mode === null ? (
                 <>
                     <button
+                        className={styles.raise}
                         onClick={() => {
                             setMode(Mode.Location);
                             if (!location.coordinates) {
@@ -77,9 +85,8 @@ const App: React.FC = () => {
                         Use Location
                     </button>
                     <button
-                        onClick={() => {
-                            setMode(Mode.Custom);
-                        }}
+                        className={styles.raise}
+                        onClick={() => setMode(Mode.Custom)}
                     >
                         Choose Custom Location
                     </button>
@@ -88,17 +95,20 @@ const App: React.FC = () => {
                 <SelectCustom setLocation={setLocation} />
             ) : mode === Mode.Location ? (
                 <>
-                    <div>Prompt for location</div>
                     {location.error?.message && (
                         <div>{`Error: ${location.error.message}`}</div>
                     )}
                 </>
             ) : null}
-            {mode !== null && <button onClick={reset}>Back</button>}
-            <h2>
-                {location.coordinates &&
-                    `Latitude: ${location.coordinates.lat}, Longitude: ${location.coordinates.lon}`}
-            </h2>
+            {mode !== null && (
+                <>
+                    <h3>
+                        {location.coordinates &&
+                            `Latitude: ${location.coordinates.lat}, Longitude: ${location.coordinates.lon}`}
+                    </h3>
+                    <button onClick={reset}>Back</button>
+                </>
+            )}
         </div>
     );
 };
