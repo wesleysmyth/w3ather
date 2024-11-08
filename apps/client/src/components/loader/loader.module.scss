@@ -1,4 +1,4 @@
-// @import '../../styles.scss';
+@use '../../styles.scss' as *;
 
 // colors
 $cloudColor: #4c9beb;
@@ -132,23 +132,5 @@ $leftBorderRadius: 50% 50% 0% 50%;
 
     100% {
         transform: translateX(15px);
-    }
-}
-
-@-webkit-keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
     }
 }

@@ -1,10 +1,17 @@
+@use '../../styles.scss' as *;
+
 body {
     display: flex;
     justify-content: center;
     text-align: center;
-    color: #fff;
     background: hsl(227, 10%, 10%);
     font: 300 1em sans-serif;
+}
+
+h1,
+h2,
+h3 {
+    color: #fff;
 }
 
 button {
@@ -20,12 +27,11 @@ button {
 
     &:hover,
     &:focus {
-        border-color: var(--hover);
-        color: var(--hover);
+        cursor: pointer;
     }
 }
 
-$colors: (
+$buttonColors: (
     raise: #ffa260,
     offset: #19bc8b,
 );
@@ -45,9 +51,9 @@ $colors: (
     }
 }
 
-@each $button, $color in $colors {
+@each $button, $color in $buttonColors {
     .#{$button} {
         --color: #{$color};
-        --hover: color.adjust($color, $hue: 45deg);
+        --hover: lighten(#{$color}, 30%);
     }
 }

@@ -41,6 +41,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
                 value={address}
                 onChange={handleChange}
                 onSelect={handleSelect}
+                debounce={300}
             >
                 {({
                     getInputProps,

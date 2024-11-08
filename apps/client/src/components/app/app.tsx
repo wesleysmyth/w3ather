@@ -1,5 +1,6 @@
 import styles from './app.module.scss';
 import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import Loader from '../loader';
 import SelectCustom from '../selectCustom';
 import { Mode } from '../../enums/modes';
@@ -9,6 +10,7 @@ const App: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [location, setLocation] = useState<LocationState>({});
     const [mode, setMode] = useState<ModeState>(null);
+    const [image, setImage] = useState<string | null>(null);
     const onSuccess = useCallback(
         ({ coords: { latitude, longitude } }: GeolocationPosition) => {
             setLocation({
@@ -45,6 +47,7 @@ const App: React.FC = () => {
         }, 3000);
     }, []);
 
+    // fetch user's location
     useEffect(() => {
         if (mode === Mode.Location) {
             if (!('geolocation' in navigator)) {
@@ -61,10 +64,28 @@ const App: React.FC = () => {
         }
     }, [mode]);
 
+    // fetch weather data based on coordinates
+    useEffect(() => {
+        if (location.coordinates) {
+            const { lat, lon } = location.coordinates;
+            axios
+                .get(
+                    `http://localhost:3000/weather/coords?lat=${lat}&lon=${lon}`
+                )
+                .then((response) => {
+                    console.log('response fsdfasdf', response);
+                    setImage(response.data?.current?.weather[0]?.icon);
+                })
+                .catch();
+        }
+    }, [location]);
+
     function reset() {
         setMode(null);
         setLocation({});
     }
+
+    console.log('image', image);
 
     return (
         <div>
@@ -102,11 +123,21 @@ const App: React.FC = () => {
             ) : null}
             {mode !== null && (
                 <>
-                    <h3>
-                        {location.coordinates &&
-                            `Latitude: ${location.coordinates.lat}, Longitude: ${location.coordinates.lon}`}
-                    </h3>
-                    <button onClick={reset}>Back</button>
+                    {image && location.coordinates && (
+                        <img
+                            src={`http://openweathermap.org/img/wn/${image}.png`}
+                            alt="weather icon"
+                        />
+                    )}
+                    {location.coordinates && (
+                        <h3>
+                            `Latitude: ${location.coordinates.lat}, Longitude: $
+                            {location.coordinates.lon}`
+                        </h3>
+                    )}
+                    <button className={styles.offset} onClick={reset}>
+                        Back
+                    </button>
                 </>
             )}
         </div>
