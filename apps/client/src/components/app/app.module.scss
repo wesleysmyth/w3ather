@@ -51,6 +51,11 @@ $buttonColors: (
     }
 }
 
+.weatherImg {
+    animation: fadeIn 1s;
+    -webkit-animation: fadeIn 1s;
+}
+
 @each $button, $color in $buttonColors {
     .#{$button} {
         --color: #{$color};

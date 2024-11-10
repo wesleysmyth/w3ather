@@ -1,11 +1,11 @@
 import { Mode } from '../enums/modes';
 
-interface Coordinates {
+export interface Coordinates {
     lat: number;
     lon: number;
 }
 
-interface LocationState {
+export interface LocationState {
     coordinates?: Coordinates;
     error?: {
         code: number;
@@ -13,6 +13,19 @@ interface LocationState {
     };
 }
 
-type ModeState = Mode | null;
+export type ModeState = Mode | null;
 
-export { Coordinates, LocationState, ModeState };
+export interface WeatherData {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    wind_speed: number;
+    weather: WeatherEntity[];
+}
+
+export interface WeatherEntity {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+}

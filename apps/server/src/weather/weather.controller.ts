@@ -1,6 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { WeatherService } from './weather.service';
-import { WeatherData } from './interfaces/weather.interface';
+import { WeatherData, AIWeatherData } from './interfaces/weather.interface';
 import { Units } from '../common/enums/units.enums';
 
 @Controller('weather')
@@ -32,6 +32,15 @@ export class WeatherController {
             lon,
             frequency,
             units
+        );
+    }
+
+    @Post('description')
+    async generateWeatherDescription(
+        @Body() aiWeatherData: AIWeatherData
+    ): Promise<string> {
+        return await this.weatherService.generateWeatherDescription(
+            aiWeatherData
         );
     }
 }

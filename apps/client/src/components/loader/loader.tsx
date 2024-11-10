@@ -1,20 +1,20 @@
 import styles from './loader.module.scss';
 import React from 'react';
+const {
+    container,
+    weather,
+    cloud,
+    front,
+    back,
+    sun,
+    sunshine,
+    leftFront,
+    leftBack,
+    rightFront,
+    rightBack,
+} = styles;
 
 const Loader: React.FC = () => {
-    const {
-        container,
-        weather,
-        cloud,
-        front,
-        back,
-        sun,
-        sunshine,
-        leftFront,
-        leftBack,
-        rightFront,
-        rightBack,
-    } = styles;
     return (
         <div className={container}>
             <div className={weather}>

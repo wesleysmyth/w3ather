@@ -8,6 +8,15 @@ export interface WeatherData {
     daily?: DailyEntity[];
 }
 
+export interface AIWeatherData {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+    wind_speed: number;
+    weather: WeatherEntity[];
+    location: string;
+}
+
 interface BaseWeatherEntity {
     dt: number;
     pressure: number;
