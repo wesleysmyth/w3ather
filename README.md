@@ -2,7 +2,7 @@
 
 ## Installation instructions
 
-To get started, clone the repo and create a .env file in your root directory. Enter the following API keys in the file. You can create API keys for each service from https://home.openweathermap.org/users/sign_up and https://platform.openai.com/settings/organization/api-keys or you can ask Wes for the keys he used to create this repo :)
+To get started, clone the repo locally and create a .env file in your root directory. Enter the API keys listed below in the .env file. You can create API keys for each service from https://home.openweathermap.org/users/sign_up and https://platform.openai.com/settings/organization/api-keys or you can ask Wes for the keys he used to run the app :)
 
 ```env
 OPENWEATHERMAP_API_KEY=<OpenWeatherMap API key>
