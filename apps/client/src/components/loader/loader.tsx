@@ -30,7 +30,7 @@ const Sun: React.FC = () => (
 
 const Loader: React.FC = () => {
     return (
-        <div className={container} aria-hidden="true">
+        <div className={container}>
             <div className={weather}>
                 <Cloud position="front" />
                 <Sun />
