@@ -42,3 +42,7 @@ or
 ```sh
 pnpm test:server
 ```
+
+## CI
+
+To see the CI test runs for the repo, visit https://cloud.nx.app/orgs/672b8d5d423b8f1d8d05cfa4/workspaces/672ba11b74b40c6c71191a5b/overview
