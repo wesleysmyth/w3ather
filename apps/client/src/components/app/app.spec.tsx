@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import App from './App';
+import App from './';
 import { LocationState } from '../../types';
 
 jest.mock('../loader', () => () => <div data-testid="loader">Loading...</div>);
