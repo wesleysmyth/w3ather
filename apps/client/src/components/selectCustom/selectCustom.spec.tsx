@@ -1,7 +1,7 @@
 import '../../../__mocks__/googleMapsMock';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import PlacesAutocomplete, { Suggestion } from 'react-places-autocomplete';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Suggestion } from 'react-places-autocomplete';
 import SelectCustom from './';
 
 jest.mock('react-places-autocomplete', () => {

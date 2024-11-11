@@ -76,6 +76,12 @@ const App: React.FC = () => {
                         setLocation={(location: LocationState) =>
                             dispatch({ type: SetLocation, payload: location })
                         }
+                        setAiDescription={(aiDescription: string) =>
+                            dispatch({
+                                type: SetAiDescription,
+                                payload: aiDescription,
+                            })
+                        }
                     />
                 )}
                 {aiDescription && (

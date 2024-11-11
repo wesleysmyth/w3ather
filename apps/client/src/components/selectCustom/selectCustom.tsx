@@ -9,10 +9,12 @@ import { LocationState } from '../../types';
 
 interface LocationSearchInputProps {
     setLocation: (location: LocationState) => void;
+    setAiDescription: (aiDescription: string) => void;
 }
 
 const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     setLocation,
+    setAiDescription,
 }) => {
     const [address, setAddress] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -24,6 +26,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     const handleSelect = useCallback(
         (selectedAddress: string) => {
             setAddress(selectedAddress);
+            setAiDescription('');
             geocodeByAddress(selectedAddress)
                 .then((results: google.maps.GeocoderResult[]) =>
                     getLatLng(results[0])
@@ -56,6 +59,7 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
         const style = {
             backgroundColor: suggestion.active ? '#fafafa' : '#ffffff',
             cursor: 'pointer',
+            color: '#00008b',
         };
 
         return (
