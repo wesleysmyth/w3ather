@@ -1,30 +1,35 @@
 import styles from './app.module.scss';
-import React, { useState, useReducer, useEffect } from 'react';
+import React, { useState, useReducer, useEffect, useCallback } from 'react';
 import Loader from '../loader';
 import SelectCustom from '../selectCustom';
 import { Mode } from '../../enums';
-import { ReducerState, LocationState, ModeState } from '../../types';
-import { fetchWeatherData, fetchAIDescription } from '../../api/weather';
+import { LocationState } from '../../types';
 import { initialAppState, appReducer } from '../../reducers/appReducer';
 import {
     useGeoLocation,
     GeoLocationDispatchType,
 } from '../../hooks/useGeoLocation';
+import useFetchWeatherInfo from '../../hooks/useFetchWeatherInfo';
 import { ActionType } from '../../enums';
+
 const { Reset, SetMode, SetLocation, SetAiDescription, SetName, SetImage } =
     ActionType;
 
 const App: React.FC = () => {
     const [state, dispatch] = useReducer(appReducer, initialAppState);
     const [loading, setLoading] = useState(false);
+    const { mode, location, aiDescription, name, image } = state;
+    const { fetchWeatherInfo } = useFetchWeatherInfo({
+        location,
+        dispatch,
+        setLoading,
+    });
     const { onGeoLocationSuccess, onGeoLocationError } = useGeoLocation(
         dispatch as GeoLocationDispatchType,
         SetLocation,
         setLoading
     );
-    const { mode, location, aiDescription, name, image } = state;
 
-    // fetch user's location
     useEffect(() => {
         if (mode === Mode.Location) {
             if (!('geolocation' in navigator)) {
@@ -43,72 +48,16 @@ const App: React.FC = () => {
                 );
             }
         }
-    }, [mode]);
+    }, [mode, onGeoLocationSuccess, onGeoLocationError]);
 
     useEffect(() => {
-        if (location.coordinates) {
-            const { lat, lon } = location.coordinates;
+        fetchWeatherInfo();
+    }, [fetchWeatherInfo]);
 
-            setLoading(true);
-
-            fetchWeatherData(lat, lon)
-                .then((weatherData) => {
-                    if (loading) {
-                        const {
-                            main: { temp, feels_like, humidity },
-                            wind: { speed },
-                            weather,
-                            name,
-                        } = weatherData;
-                        dispatch({ type: SetImage, payload: weather[0].icon });
-                        dispatch({ type: SetName, payload: name });
-
-                        fetchAIDescription({
-                            temp,
-                            feels_like,
-                            humidity,
-                            weather,
-                            location,
-                            wind_speed: speed,
-                        })
-                            .then((description: string) => {
-                                if (loading) {
-                                    dispatch({
-                                        type: SetAiDescription,
-                                        payload: description,
-                                    });
-                                    setLoading(false);
-                                }
-                            })
-                            .catch(() => {
-                                dispatch({
-                                    type: SetAiDescription,
-                                    payload:
-                                        'Error generating weather description',
-                                });
-                                setLoading(false);
-                            });
-                    }
-                })
-                .catch(() => {
-                    dispatch({
-                        type: SetLocation,
-                        payload: {
-                            error: {
-                                code: 500,
-                                message: 'Error fetching weather data',
-                            },
-                        },
-                    });
-                    setLoading(false);
-                });
-        }
-    }, [location]);
-
-    function reset() {
+    const reset = useCallback(() => {
         setLoading(false);
         dispatch({ type: Reset });
-    }
+    }, [dispatch]);
 
     return (
         <>
@@ -127,13 +76,6 @@ const App: React.FC = () => {
                         setLocation={(location: LocationState) =>
                             dispatch({ type: SetLocation, payload: location })
                         }
-                        setAiDescription={(description: string) =>
-                            dispatch({
-                                type: SetAiDescription,
-                                payload: description,
-                            })
-                        }
-                        setLoading={setLoading}
                     />
                 )}
                 {aiDescription && (

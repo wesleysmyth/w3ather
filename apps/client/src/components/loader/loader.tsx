@@ -14,23 +14,30 @@ const {
     rightBack,
 } = styles;
 
+const Cloud: React.FC<{ position: 'front' | 'back' }> = ({ position }) => (
+    <div className={`${cloud} ${styles[position]}`}>
+        <span className={position === 'front' ? leftFront : leftBack}></span>
+        <span className={position === 'front' ? rightFront : rightBack}></span>
+    </div>
+);
+
+const Sun: React.FC = () => (
+    <>
+        <span className={`${sun} ${sunshine}`}></span>
+        <span className={sun}></span>
+    </>
+);
+
 const Loader: React.FC = () => {
     return (
-        <div className={container}>
+        <div className={container} aria-hidden="true">
             <div className={weather}>
-                <div className={`${cloud} ${front}`}>
-                    <span className={leftFront}></span>
-                    <span className={rightFront}></span>
-                </div>
-                <span className={`${sun} ${sunshine}`}></span>
-                <span className={sun}></span>
-                <div className={`${cloud} ${back}`}>
-                    <span className={leftBack}></span>
-                    <span className={rightBack}></span>
-                </div>
+                <Cloud position="front" />
+                <Sun />
+                <Cloud position="back" />
             </div>
         </div>
     );
 };
 
-export default Loader;
+export default React.memo(Loader);

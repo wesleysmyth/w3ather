@@ -1,7 +1,7 @@
 import { ReducerState, ModeState, LocationState } from '../types';
 import { ActionType } from '../enums';
 
-type Action =
+export type Action =
     | { type: ActionType.Reset }
     | { type: ActionType.SetMode; payload: ModeState }
     | { type: ActionType.SetLocation; payload: LocationState }
