@@ -9,7 +9,7 @@ OPENWEATHERMAP_API_KEY=<OpenWeatherMap API key>
 OPENAI_API_KEY=<OpenAI API key>
 ```
 
-Once your .env file is created, make sure you have (pnpm)[https://pnpm.io/installation] installed, and from the root directory run:
+Once your .env file is created, make sure you have [pnpm](https://pnpm.io/installation) installed, and from the root directory run:
 
 ```sh
 pnpm install
