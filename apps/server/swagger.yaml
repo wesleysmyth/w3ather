@@ -1,0 +1,216 @@
+openapi: 3.0.0
+info:
+  title: Weather API
+  description: API for retrieving weather information and generating descriptions.
+  version: 1.0.0
+paths:
+  /weather/city:
+    get:
+      summary: Get Weather by City
+      description: Retrieve weather data based on the city name.
+      parameters:
+        - name: city
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Name of the city to retrieve weather data for.
+        - name: units
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - metric
+              - imperial
+            default: imperial
+          description: Units of measurement for temperature. Can be 'metric' or 'imperial'.
+      responses:
+        '200':
+          description: Weather data for the specified city.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherData'
+  /weather/coords:
+    get:
+      summary: Get Weather by Coordinates
+      description: Retrieve weather data based on latitude and longitude coordinates.
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          description: Latitude of the location.
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          description: Longitude of the location.
+        - name: units
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - metric
+              - imperial
+            default: imperial
+          description: Units of measurement for temperature. Can be 'metric' or 'imperial'.
+      responses:
+        '200':
+          description: Weather data for the specified coordinates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherData'
+  /weather/description:
+    post:
+      summary: Generate Weather Description
+      description: Generate a descriptive text of the weather conditions based on provided weather data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIWeatherData'
+      responses:
+        '200':
+          description: Generated weather description.
+          content:
+            application/json:
+              schema:
+                type: string
+                example: It is a sunny day with mild temperatures and clear skies.
+components:
+  schemas:
+    WeatherData:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: float
+          description: Latitude of the location.
+        lon:
+          type: number
+          format: float
+          description: Longitude of the location.
+        timezone:
+          type: string
+          description: Timezone of the location.
+        timezone_offset:
+          type: integer
+          description: Offset from UTC in seconds.
+        current:
+          $ref: '#/components/schemas/CurrentEntity'
+        hourly:
+          type: array
+          items:
+            $ref: '#/components/schemas/HourlyEntity'
+        daily:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyEntity'
+    AIWeatherData:
+      type: object
+      properties:
+        temp:
+          type: number
+          format: float
+          description: Temperature in degrees.
+        feels_like:
+          type: number
+          format: float
+          description: Feels like temperature in degrees.
+        humidity:
+          type: integer
+          description: Humidity percentage.
+        wind_speed:
+          type: number
+          format: float
+          description: Wind speed in meters per second.
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherEntity'
+          description: Array of weather conditions.
+        location:
+          type: string
+          description: Name of the location.
+    CurrentEntity:
+      type: object
+      properties:
+        dt:
+          type: integer
+          description: Time of data calculation.
+        sunrise:
+          type: integer
+          description: Sunrise time.
+        sunset:
+          type: integer
+          description: Sunset time.
+        temp:
+          type: number
+          format: float
+        feels_like:
+          type: number
+          format: float
+        pressure:
+          type: integer
+        humidity:
+          type: integer
+        dew_point:
+          type: number
+          format: float
+        uvi:
+          type: number
+          format: float
+        clouds:
+          type: integer
+        visibility:
+          type: integer
+        wind_speed:
+          type: number
+          format: float
+        wind_deg:
+          type: integer
+        wind_gust:
+          type: number
+          format: float
+        weather:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeatherEntity'
+    WeatherEntity:
+      type: object
+      properties:
+        id:
+          type: integer
+        main:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+    HourlyEntity:
+      allOf:
+        - $ref: '#/components/schemas/CurrentEntity'
+    DailyEntity:
+      allOf:
+        - $ref: '#/components/schemas/CurrentEntity'
+      properties:
+        sunrise:
+          type: integer
+        sunset:
+          type: integer
+        moonrise:
+          type: integer
+        moonset:
+          type: integer
+        moon_phase:
+          type: number
+          format: float
