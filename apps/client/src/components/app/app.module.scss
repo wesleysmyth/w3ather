@@ -2,28 +2,55 @@
 
 body {
     display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     justify-content: center;
     text-align: center;
-    background: hsl(227, 10%, 10%);
-    font: 300 1em sans-serif;
+    background: $background;
+}
+
+.content {
+    font-size: 1.3em;
+    line-height: 2em;
+    padding: 0 50px;
+    flex: 1;
+
+    input {
+        width: 50%;
+        height: 40px;
+        border-radius: 0.4em;
+        border: none;
+        margin-bottom: 15px;
+        font-family: monospace;
+        padding-left: 10px;
+        outline: none;
+    }
 }
 
 h1,
 h2,
 h3 {
-    color: #fff;
+    color: #c1f6ff;
+}
+
+.nameAndIcon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1em;
 }
 
 button {
     background: none;
-    border: 2px solid;
-    font: inherit;
     line-height: 1;
     margin: 0.5em;
     padding: 1em 2em;
-    color: var(--color);
+    color: $buttonColor;
+    border: 0;
     transition: 0.25s;
     border-radius: 0.5em;
+    background-color: var(--color);
+    font-family: monospace;
 
     &:hover,
     &:focus {
@@ -32,7 +59,7 @@ button {
 }
 
 $buttonColors: (
-    raise: #ffa260,
+    raise: #b0a0f7,
     offset: #19bc8b,
 );
 
@@ -54,6 +81,11 @@ $buttonColors: (
 .weatherImg {
     animation: fadeIn 1s;
     -webkit-animation: fadeIn 1s;
+}
+
+.description {
+    -webkit-animation: fadeIn 1s;
+    animation: fadeIn 1s;
 }
 
 @each $button, $color in $buttonColors {

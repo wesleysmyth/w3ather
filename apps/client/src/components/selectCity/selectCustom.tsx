@@ -20,10 +20,9 @@ const LocationSearchInput: React.FC<LocationSearchInputProps> = ({
     }, []);
     const handleSelect = useCallback((address: string) => {
         geocodeByAddress(address)
-            .then((results: google.maps.GeocoderResult[]) => {
-                console.log('results', results);
-                return getLatLng(results[0]);
-            })
+            .then((results: google.maps.GeocoderResult[]) =>
+                getLatLng(results[0])
+            )
             .then(({ lat, lng }: { lat: number; lng: number }) =>
                 setLocation({
                     coordinates: {

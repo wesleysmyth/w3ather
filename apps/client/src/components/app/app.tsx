@@ -1,56 +1,28 @@
 import styles from './app.module.scss';
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useState, useReducer, useEffect } from 'react';
 import Loader from '../loader';
 import SelectCustom from '../selectCustom';
-import { Mode } from '../../enums/modes';
-import { LocationState, ModeState } from '../../types';
+import { Mode } from '../../enums';
+import { ReducerState, LocationState, ModeState } from '../../types';
 import { fetchWeatherData, fetchAIDescription } from '../../api/weather';
+import { initialAppState, appReducer } from '../../reducers/appReducer';
+import {
+    useGeoLocation,
+    GeoLocationDispatchType,
+} from '../../hooks/useGeoLocation';
+import { ActionType } from '../../enums';
+const { Reset, SetMode, SetLocation, SetAiDescription, SetName, SetImage } =
+    ActionType;
 
 const App: React.FC = () => {
-    const [loading, setLoading] = useState(true);
-    const [location, setLocation] = useState<LocationState>({});
-    const [mode, setMode] = useState<ModeState>(null);
-    const [image, setImage] = useState<string | null>(null);
-    const [aiDescription, setAIDescription] = useState<string | null>(null);
-    const onGeoLocationSuccess = useCallback(
-        ({ coords: { latitude, longitude } }: GeolocationPosition) => {
-            setLocation({
-                coordinates: {
-                    lat: latitude,
-                    lon: longitude,
-                },
-            });
-            setLoading(false);
-        },
-        []
+    const [state, dispatch] = useReducer(appReducer, initialAppState);
+    const [loading, setLoading] = useState(false);
+    const { onGeoLocationSuccess, onGeoLocationError } = useGeoLocation(
+        dispatch as GeoLocationDispatchType,
+        SetLocation,
+        setLoading
     );
-    const onGeoLocationError = useCallback(
-        (error: GeolocationPositionError) => {
-            const errorMessages: { [key: number]: string } = {
-                1: 'You denied the request for Geolocation.',
-                2: 'Your location information is unavailable.',
-                3: 'Your request timed out. Please try again.',
-            };
-
-            const message =
-                errorMessages[error.code] || 'An unknown error occurred.';
-            setLocation({
-                error: {
-                    code: error.code,
-                    message,
-                },
-            });
-        },
-        []
-    );
-
-    // initial load effect
-    useEffect(() => {
-        setTimeout(() => {
-            setLoading(false);
-        }, 1000);
-    }, []);
+    const { mode, location, aiDescription, name, image } = state;
 
     // fetch user's location
     useEffect(() => {
@@ -66,7 +38,8 @@ const App: React.FC = () => {
             } else {
                 navigator.geolocation.getCurrentPosition(
                     onGeoLocationSuccess,
-                    onGeoLocationError
+                    onGeoLocationError,
+                    { timeout: 10000, enableHighAccuracy: true }
                 );
             }
         }
@@ -75,89 +48,153 @@ const App: React.FC = () => {
     useEffect(() => {
         if (location.coordinates) {
             const { lat, lon } = location.coordinates;
+
+            setLoading(true);
+
             fetchWeatherData(lat, lon)
                 .then((weatherData) => {
-                    const { temp, feels_like, humidity, wind_speed, weather } =
-                        weatherData;
-                    setImage(weather[0].icon);
+                    if (loading) {
+                        const {
+                            main: { temp, feels_like, humidity },
+                            wind: { speed },
+                            weather,
+                            name,
+                        } = weatherData;
+                        dispatch({ type: SetImage, payload: weather[0].icon });
+                        dispatch({ type: SetName, payload: name });
 
-                    fetchAIDescription(
-                        temp,
-                        feels_like,
-                        humidity,
-                        wind_speed,
-                        weather,
-                        location
-                    )
-                        .then((description: string) =>
-                            setAIDescription(description)
-                        )
-                        .catch(); // TODO: handle error
+                        fetchAIDescription({
+                            temp,
+                            feels_like,
+                            humidity,
+                            weather,
+                            location,
+                            wind_speed: speed,
+                        })
+                            .then((description: string) => {
+                                if (loading) {
+                                    dispatch({
+                                        type: SetAiDescription,
+                                        payload: description,
+                                    });
+                                    setLoading(false);
+                                }
+                            })
+                            .catch(() => {
+                                dispatch({
+                                    type: SetAiDescription,
+                                    payload:
+                                        'Error generating weather description',
+                                });
+                                setLoading(false);
+                            });
+                    }
                 })
-                .catch(); // TODO: handle error
+                .catch(() => {
+                    dispatch({
+                        type: SetLocation,
+                        payload: {
+                            error: {
+                                code: 500,
+                                message: 'Error fetching weather data',
+                            },
+                        },
+                    });
+                    setLoading(false);
+                });
         }
     }, [location]);
 
     function reset() {
-        setMode(null);
-        setLocation({});
+        setLoading(false);
+        dispatch({ type: Reset });
     }
 
     return (
-        <div>
-            <h1>Get the w3ather!</h1>
-            {loading ? (
-                <Loader />
-            ) : mode === null ? (
-                <>
-                    <button
-                        className={styles.raise}
-                        onClick={() => {
-                            setMode(Mode.Location);
-                            if (!location.coordinates) {
+        <>
+            <header>
+                <h1>Get the w3ather</h1>
+            </header>
+            <section className={styles.content}>
+                {loading && <Loader />}
+                {location.error?.message && (
+                    <p
+                        className={styles.description}
+                    >{`Error: ${location.error.message}`}</p>
+                )}
+                {mode === Mode.Custom && (
+                    <SelectCustom
+                        setLocation={(location: LocationState) =>
+                            dispatch({ type: SetLocation, payload: location })
+                        }
+                        setAiDescription={(description: string) =>
+                            dispatch({
+                                type: SetAiDescription,
+                                payload: description,
+                            })
+                        }
+                        setLoading={setLoading}
+                    />
+                )}
+                {aiDescription && (
+                    <p className={styles.description}>{aiDescription}</p>
+                )}
+            </section>
+            <footer>
+                {mode === null ? (
+                    <>
+                        <button
+                            className={styles.raise}
+                            onClick={() => {
                                 setLoading(true);
+                                dispatch({
+                                    type: SetMode,
+                                    payload: Mode.Location,
+                                });
+                            }}
+                        >
+                            Use Current Location
+                        </button>
+                        <button
+                            className={styles.raise}
+                            onClick={() =>
+                                dispatch({
+                                    type: SetMode,
+                                    payload: Mode.Custom,
+                                })
                             }
-                        }}
-                    >
-                        Use Location
-                    </button>
-                    <button
-                        className={styles.raise}
-                        onClick={() => setMode(Mode.Custom)}
-                    >
-                        Choose Custom Location
-                    </button>
-                </>
-            ) : mode === Mode.Custom ? (
-                <SelectCustom setLocation={setLocation} />
-            ) : mode === Mode.Location ? (
-                <>
-                    {location.error?.message && (
-                        <div>{`Error: ${location.error.message}`}</div>
-                    )}
-                </>
-            ) : null}
-            {mode !== null && (
-                <>
-                    {image && location.coordinates && (
-                        <img
-                            className={styles.weatherImg}
-                            src={`http://openweathermap.org/img/wn/${image}.png`}
-                            alt="weather icon"
-                        />
-                    )}
-                    {aiDescription ? <p>{aiDescription}</p> : <Loader />}
-                    {location.coordinates && (
-                        <h3>
-                            {`Latitude: ${location.coordinates.lat}, Longitude: ${location.coordinates.lon}`}
-                        </h3>
-                    )}
-                    <button className={styles.offset} onClick={reset}>
-                        Back
-                    </button>
-                </>
-            )}
-        </div>
+                        >
+                            Choose Custom Location
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <div className={styles.nameAndIcon}>
+                            {image && location.coordinates && (
+                                <img
+                                    className={styles.weatherImg}
+                                    src={`http://openweathermap.org/img/wn/${image}.png`}
+                                    alt="weather icon"
+                                />
+                            )}
+                            {name && <h2>{name}</h2>}
+                        </div>
+                        {location.coordinates && (
+                            <h3>
+                                {`Latitude: ${location.coordinates.lat}, Longitude: ${location.coordinates.lon}`}
+                            </h3>
+                        )}
+                        <button
+                            className={styles.offset}
+                            onClick={reset}
+                            disabled={loading}
+                        >
+                            Back
+                        </button>
+                    </>
+                )}
+            </footer>
+        </>
     );
 };
 

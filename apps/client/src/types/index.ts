@@ -1,4 +1,4 @@
-import { Mode } from '../enums/modes';
+import { Mode } from '../enums';
 
 export interface Coordinates {
     lat: number;
@@ -16,11 +16,25 @@ export interface LocationState {
 export type ModeState = Mode | null;
 
 export interface WeatherData {
+    name: string;
+    weather: WeatherEntity[];
+    main: {
+        temp: number;
+        feels_like: number;
+        humidity: number;
+    };
+    wind: {
+        speed: number;
+    };
+}
+
+export interface AIWeatherData {
     temp: number;
     feels_like: number;
     humidity: number;
     wind_speed: number;
     weather: WeatherEntity[];
+    location: LocationState;
 }
 
 export interface WeatherEntity {
@@ -28,4 +42,12 @@ export interface WeatherEntity {
     main: string;
     description: string;
     icon: string;
+}
+
+export interface ReducerState {
+    mode: ModeState;
+    location: LocationState;
+    aiDescription: string | null;
+    name: string | null;
+    image: string | null;
 }

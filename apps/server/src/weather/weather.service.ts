@@ -9,52 +9,37 @@ import { CityAPIParamsDto } from './dto/city.dto';
 
 @Injectable()
 export class WeatherService {
-    private readonly apiKey: string;
-    private readonly apiUrl: string =
-        'https://api.openweathermap.org/data/3.0/onecall';
+    private readonly apiKey: string = this.configService.get(
+        'OPENWEATHERMAP_API_KEY'
+    );
     private readonly geoApiUrl: string =
         'https://api.openweathermap.org/data/2.5/weather';
     private readonly openAIClient = new OpenAI({
         apiKey: this.configService.get('OPENAI_API_KEY'),
     });
 
-    constructor(private readonly configService: ConfigService) {
-        this.apiKey = this.configService.get('OPENWEATHERMAP_API_KEY');
-    }
+    constructor(private readonly configService: ConfigService) {}
 
     async getWeatherByCity(
         city: string,
-        frequency = 'current',
         units: Units = Units.Imperial
     ): Promise<WeatherData> {
         const { lat, lon } = await this.getCityCoordinates(city);
-        return this.getWeatherByCoords(lat, lon, frequency, units);
+        return this.getWeatherByCoords(lat, lon, units);
     }
 
     async getWeatherByCoords(
         lat: number,
         lon: number,
-        frequency = 'current',
         units: Units = Units.Imperial
     ): Promise<WeatherData> {
-        const exclude: string = [
-            'current',
-            'minutely',
-            'hourly',
-            'daily',
-            'alerts',
-        ]
-            .filter((_frequency: string) => _frequency !== frequency)
-            .join(',');
         const params = new WeatherAPIParamsDto({
             appid: this.apiKey,
             lat,
             lon,
-            exclude,
             units,
         });
-        const response = await axios.get(this.apiUrl, { params });
-        console.log('response.data', response.data);
+        const response = await axios.get(this.geoApiUrl, { params });
 
         return response.data;
     }
@@ -72,7 +57,7 @@ export class WeatherService {
             Weather: ${aiWeatherData.weather[0].main} (${aiWeatherData.weather[0].description})
             Location: ${aiWeatherData.location}
 
-            Create a description in a friendly and descriptive tone.
+            Create a description in a friendly and descriptive tone, and just go straight into giving the user a sense of what the weather is like without any initial pleasantries.
         `;
         const params: OpenAI.Chat.ChatCompletionCreateParams = {
             messages: [{ role: 'user', content }],
@@ -108,7 +93,6 @@ export class WeatherService {
     }
 
     private handleError(error: AxiosError<{ message: string }>): void {
-        console.log('error', error);
         if (error.response) {
             throw new HttpException(
                 error.response?.data?.message || 'Error fetching weather data',

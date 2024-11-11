@@ -10,29 +10,18 @@ export class WeatherController {
     @Get('city')
     async getWeatherByCity(
         @Query('city') city: string,
-        @Query('frequency') frequency?: string,
         @Query('units') units?: Units
     ): Promise<WeatherData> {
-        return await this.weatherService.getWeatherByCity(
-            city,
-            frequency,
-            units
-        );
+        return await this.weatherService.getWeatherByCity(city, units);
     }
 
     @Get('coords')
     async getWeatherByCoords(
         @Query('lat') lat: number,
         @Query('lon') lon: number,
-        @Query('frequency') frequency?: string,
         @Query('units') units?: Units
     ): Promise<WeatherData> {
-        return await this.weatherService.getWeatherByCoords(
-            lat,
-            lon,
-            frequency,
-            units
-        );
+        return await this.weatherService.getWeatherByCoords(lat, lon, units);
     }
 
     @Post('description')
