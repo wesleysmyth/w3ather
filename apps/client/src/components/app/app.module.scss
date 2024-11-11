@@ -30,7 +30,7 @@ body {
 h1,
 h2,
 h3 {
-    color: #c1f6ff;
+    color: $headerColor;
 }
 
 .nameAndIcon {
@@ -45,7 +45,7 @@ button {
     line-height: 1;
     margin: 0.5em;
     padding: 1em 2em;
-    color: $buttonColor;
+    color: $buttonTextColor;
     border: 0;
     transition: 0.25s;
     border-radius: 0.5em;
@@ -59,8 +59,8 @@ button {
 }
 
 $buttonColors: (
-    raise: #b0a0f7,
-    offset: #19bc8b,
+    raise: $purpleButton,
+    offset: $greenButton,
 );
 
 .raise:hover,
