@@ -65,5 +65,12 @@
                 "linter": "eslint"
             }
         }
+    },
+    "tasksRunnerOptions": {
+        "default": {
+            "options": {
+                "pnpmExecPath": "pnpm"
+            }
+        }
     }
 }
